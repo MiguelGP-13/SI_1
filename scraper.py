@@ -15,23 +15,23 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-def get_movie(nombre):
+def get_movie_multi(nombre):
     #el url donde buscamos, según el nombre de la película que queramos buscar
     search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
-    
+    headers = {"User-Agent": "Mozilla/5.0"}
+
     #realiza la petición al url establecido antes
-    req = urllib.request.Request(search_url, headers=HEADERS)
+    req = urllib.request.Request(search_url, headers=headers)
     f = urllib.request.urlopen(req)
     s = f.read().decode()
     f.close() #cerramos para consumir menos recursos
     
-    expres= r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+"'
+    matches = re.findall(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+"', s)
     #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
-    match = re.search(expres, s)
 
-    if match:
-        movie_url = "https://www.imdb.com/es" + match.group(1)  #concatenar con la cabecera de la url q usaremos para el apartado donde extraemos información
-        return movie_url
+    if matches:
+        movie_urls = ["https://www.imdb.com" + match for match in matches[:5]]
+        return movie_urls
     else:
         raise Exception("No se encontró la película") #en caso de error.
 
@@ -88,6 +88,6 @@ def obtener_informacion(url):
 # Ejemplo de uso
 if __name__ == "__main__":
     movie_name = input("Introduce el nombre de la película: ")
-    url = get_movie(movie_name)
-    print(url)
-    print(obtener_informacion(url))
+    urls = get_movie_multi(movie_name)
+    print(urls)
+    print(obtener_informacion(urls[0]))
