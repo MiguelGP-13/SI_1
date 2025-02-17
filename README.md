@@ -2,9 +2,10 @@
 Práctica 1 de Sistemas inteligentes
 
 - scraper.ipynb:
-: Estudio de la regex, primera versión.
-Saca:
-Año, Calificación, Duración, puntuación, nº de votos, sinopsis
+Pruebas
+- scraper.py:
+Función y código creado
 
-Primer find encuentra todo. 
-Segundo findall saca datos de director, guionistas, elenco...
+### Saca:
+
+Primer find encuentra año, calificación, duración, puntuación, nº de votos, sinopsis. El segundo findall saca datos de director, guionistas y elenco.
