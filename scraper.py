@@ -6,12 +6,34 @@ CLASS_RATING = 'sc-d541859f-1 imUuxf'  # Dentro de un span
 CLASS_NUMEROVOTOS = 'sc-d541859f-3 dwhNqC' # Dentro de un div
 CLASS_SINOPSIS = 'sc-42125d72-1 igbBrx'
 # Coger los 3 primeros (direccion, guionistas, elenco)
-CLASS_DATOS = 'ipc-metadata-list-item__content-container'  # Dentro de un div
+CLASS_GUION = 'ipc-metadata-list-item__label ipc-metadata-list-item__label--link'
+CLASS_DIRECTOR = 'ipc-metadata-list-item__label ipc-metadata-list-item__label--btn' # Dentro de un span
+CLASS_NOMBRE = 'ipc-metadata-list-item__content-container'  # Dentro de un div
 
 # Definir los headers
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
+
+def get_movie(nombre):
+    #el url donde buscamos, según el nombre de la película que queramos buscar
+    search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
+    
+    #realiza la petición al url establecido antes
+    req = urllib.request.Request(search_url, headers=HEADERS)
+    f = urllib.request.urlopen(req)
+    s = f.read().decode()
+    f.close() #cerramos para consumir menos recursos
+    
+    expres= r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+"'
+    #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
+    match = re.search(expres, s)
+
+    if match:
+        movie_url = "https://www.imdb.com/es" + match.group(1)  #concatenar con la cabecera de la url q usaremos para el apartado donde extraemos información
+        return movie_url
+    else:
+        raise Exception("No se encontró la película") #en caso de error.
 
 def obtener_informacion(url):
     # Crear una petición con los headers
@@ -27,9 +49,9 @@ def obtener_informacion(url):
     # Sacamos (Año), (Calificación), (Duración)
     EXTRACTOR = rf'.*\<ul class="{CLASS_DURACION}"[^\>]*?\>\<li[^\>]*?\>\<a[^\>]*?\>([\d]+?)\<.+?\<li[^\>]*?\>\<a[^\>]*?\>([^<]+?)\<.+?\<li[^\>]*?\>([^\<]+?)\<.+' 
     # Sacamos (puntuación)
-    EXTRACTOR += rf'\<span class="{CLASS_RATING}"\>([\d\.]+)\<.+'
+    EXTRACTOR += rf'\<span class="{CLASS_RATING}"\>([\d\.\,]+)\<.+'
     # Sacamos (nº de votos)
-    EXTRACTOR += rf'\<div class="{CLASS_NUMEROVOTOS}"\>([\d]+?)\<.+'
+    EXTRACTOR += rf'\<div class="{CLASS_NUMEROVOTOS}"\>([^\<]+?)\<.+'
     # Sacamos (sinopsis)
     EXTRACTOR += rf'\<span [^\>]*?class="{CLASS_SINOPSIS}"\>([^<]+?)\<'
 
@@ -48,11 +70,11 @@ def obtener_informacion(url):
     }
 
     # Sacamos (direccion), (guionistas), (elenco) con un findall
-    INFORMACION = rf'\<(?:span|a).*?aria-label="Ver elenco y equipo completos".+?\>([^\>]+?)\<\/(?:span|a)\>\<div class="{CLASS_DATOS}"\>\<ul.+?\>(.+?)\<\/ul\>'
+    INFORMACION = rf'\<(?:span|a) class="(?:{CLASS_GUION}|{CLASS_DIRECTOR})"[^\>]+?\>([^\<]+?)\<\/(?:span|a)\>\<div class="{CLASS_NOMBRE}"\>\<ul.+?\>(.+?)\<\/ul\>'
     # Limpiamos los resultados sacando los nombres y quitando las etiquetas HTML
     obtener_nombres = re.compile(r'([^\>]+)\<\/a\>')
 
-        # Encontrar todas las coincidencias
+    # Sacamos reparto y guión
     coincidencias = re.finditer(INFORMACION, html)
     # Iterar sobre las coincidencias y agregar a la lista hasta encontrar 4
     for i, match in enumerate(coincidencias):
@@ -62,3 +84,10 @@ def obtener_informacion(url):
     
     
     return datos
+
+# Ejemplo de uso
+if __name__ == "__main__":
+    movie_name = input("Introduce el nombre de la película: ")
+    url = get_movie(movie_name)
+    print(url)
+    print(obtener_informacion(url))
