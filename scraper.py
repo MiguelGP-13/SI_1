@@ -58,7 +58,6 @@ def obtener_informacion(url):
     # Extraemos la información
     resultados =  re.search(EXTRACTOR, html, re.DOTALL)
     anio, calificacion, duracion, puntuacion, num_votos, sinopsis = resultados.groups()
-    print(num_votos)
 
     # Creamos el diccionario con los datos extraídos
     datos = {
@@ -99,7 +98,7 @@ if __name__ == "__main__":
     ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
     ["Inception", "El caballero oscuro", "Interstellar"],
     ["Forrest Gump", "Cadena perpetua"],
-    ["El señor de los anillos", "Star Wars: Episodio V - El Imperio contraataca", "Matrix"],
+    ["El senor de los anillos", "Star Wars: Episodio V", "Matrix"],
     ["Gladiator", "Titanic", "Avatar"]]
 
 for movie_list in movies:
