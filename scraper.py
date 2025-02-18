@@ -58,14 +58,15 @@ def obtener_informacion(url):
     # Extraemos la información
     resultados =  re.search(EXTRACTOR, html, re.DOTALL)
     anio, calificacion, duracion, puntuacion, num_votos, sinopsis = resultados.groups()
+    print(num_votos)
 
     # Creamos el diccionario con los datos extraídos
     datos = {
-        'Año': anio,
+        'Año': int(anio.replace('\xa0','')),
         'Calificación': calificacion,
-        'Duración': duracion,
-        'Puntuación': float(puntuacion.replace('\xa0k','')),
-        'Número de Votos': int(num_votos.replace('\xa0k','')),
+        'Duración': duracion.replace('h',' horas').replace('min', ' minutos'),
+        'Puntuación': float(puntuacion.replace('\xa0','')),
+        'Número de Votos': int(float(num_votos.replace('\xa0','').replace('M',''))* 1000000) if 'M' in num_votos else (int(float(num_votos.replace('\xa0','').replace('k',''))* 1000) if 'k' in num_votos else int(num_votos.replace('\xa0',''))),
         'Sinopsis': sinopsis
     }
 
@@ -87,7 +88,32 @@ def obtener_informacion(url):
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    movie_name = input("Introduce el nombre de la película: ")
-    urls = get_movie_multi(movie_name)
-    print(urls)
-    print(obtener_informacion(urls[0][1]))
+    import concurrent.futures
+
+    def ejecutar_con_timeout(func, *args, timeout):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(func, *args)
+            return future.result(timeout=timeout)
+
+    movies = [
+    ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
+    ["Inception", "El caballero oscuro", "Interstellar"],
+    ["Forrest Gump", "Cadena perpetua"],
+    ["El señor de los anillos", "Star Wars: Episodio V - El Imperio contraataca", "Matrix"],
+    ["Gladiator", "Titanic", "Avatar"]]
+
+for movie_list in movies:
+    for movie_list in movies:
+        for movie_name in movie_list:
+            try:
+                urls = ejecutar_con_timeout(get_movie_multi, movie_name, timeout=7)
+                print(urls)
+                info = ejecutar_con_timeout(obtener_informacion, urls[0][1], timeout=7)
+                print(info)
+                print()
+            except concurrent.futures.TimeoutError:
+                print('!!!!!!!')
+                print(f"Tiempo de espera agotado para {movie_name}")
+            except Exception as e:
+                print('!!!!!!!')
+                print(f"Error al procesar {movie_name}: {e}")
