@@ -18,10 +18,9 @@ HEADERS = {
 def get_movie_multi(nombre):
     #el url donde buscamos, según el nombre de la película que queramos buscar
     search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
-    headers = {"User-Agent": "Mozilla/5.0"}
 
     #realiza la petición al url establecido antes
-    req = urllib.request.Request(search_url, headers=headers)
+    req = urllib.request.Request(search_url, headers=HEADERS)
     f = urllib.request.urlopen(req)
     s = f.read().decode()
     f.close() #cerramos para consumir menos recursos
@@ -30,7 +29,7 @@ def get_movie_multi(nombre):
     #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
 
     if matches:
-        movie_urls = ["https://www.imdb.com" + match for match in matches[:5]]
+        movie_urls = ["https://www.imdb.com/es" + match for match in matches[:5]]
         return movie_urls
     else:
         raise Exception("No se encontró la película") #en caso de error.
@@ -47,13 +46,13 @@ def obtener_informacion(url):
 
 
     # Sacamos (Año), (Calificación), (Duración)
-    EXTRACTOR = rf'.*\<ul class="{CLASS_DURACION}"[^\>]*?\>\<li[^\>]*?\>\<a[^\>]*?\>([\d]+?)\<.+?\<li[^\>]*?\>\<a[^\>]*?\>([^<]+?)\<.+?\<li[^\>]*?\>([^\<]+?)\<.+' 
+    EXTRACTOR = rf'.*\<ul class="{CLASS_DURACION}"[^\>]*?\>.*?\<li[^\>]*?\>\<a[^\>]*?\>([\d]+?)\<.+?(?:\<li[^\>]*?\>\<a[^\>]*?\>([^<]+?)\<.+?)?\<li[^\>]*?\>([^\<]+?)\<.+' 
     # Sacamos (puntuación)
-    EXTRACTOR += rf'\<span class="{CLASS_RATING}"\>([\d\.\,]+)\<.+'
+    EXTRACTOR += rf'(?:\<span class="{CLASS_RATING}"\>([\d\.\,]+)\<.+)?'
     # Sacamos (nº de votos)
-    EXTRACTOR += rf'\<div class="{CLASS_NUMEROVOTOS}"\>([^\<]+?)\<.+'
+    EXTRACTOR += rf'(?:\<div class="{CLASS_NUMEROVOTOS}"\>([^\<]+?)\<.+)?'
     # Sacamos (sinopsis)
-    EXTRACTOR += rf'\<span [^\>]*?class="{CLASS_SINOPSIS}"\>([^<]+?)\<'
+    EXTRACTOR += rf'(?:\<span [^\>]*?class="{CLASS_SINOPSIS}"\>([^<]+?)\<)?'
 
     # Extraemos la información
     resultados =  re.search(EXTRACTOR, html, re.DOTALL)
