@@ -1,4 +1,5 @@
 import urllib.request
+import urllib.parse
 import re
 
 CLASS_DURACION = 'ipc-inline-list ipc-inline-list--show-dividers sc-ec65ba05-2 joVhBE baseAlt'  # Tiene dentro 3 li con año, clasificación y duración
@@ -17,7 +18,7 @@ HEADERS = {
 
 def get_movie_multi(nombre):
     #el url donde buscamos, según el nombre de la película que queramos buscar
-    search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
+    search_url = f"https://www.imdb.com/find/?q={urllib.parse.quote(nombre)}"
 
     #realiza la petición al url establecido antes
     req = urllib.request.Request(search_url, headers=HEADERS)
@@ -87,23 +88,32 @@ def obtener_informacion(url):
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    movies = [
-    ["El señor de los anillos","El Padrino", "Pulp Fiction", "Cielo e infierno"],
-    ["Inception", "El caballero oscuro", "Interstellar"],
-    ["Forrest Gump", "Cadena perpetua"],
-    ["Star Wars: Episodio V", "Matrix"],
-    ["Gladiator", "Titanic", "Avatar"]]
+    import concurrent.futures
 
+    def ejecutar_con_timeout(func, *args, timeout):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(func, *args)
+            return future.result(timeout=timeout)
+
+    movies = [
+    ["El niño","Star Wars: Episodio V", "Matrix"],
+    ["Gladiator", "Titanic", "Avatar"],
+    ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
+    ["Inception", "El caballero oscuro", "Interstellar"],
+    ["Forrest Gump", "Cadena perpetua"]]
+
+for movie_list in movies:
     for movie_list in movies:
-        for movie_list in movies:
-            for movie_name in movie_list:
-                try:
-                    urls = get_movie_multi(movie_name)
-                    print(urls[0])
-                    info = obtener_informacion(urls[0][1])
-                    # print(info)
-                    print(urls[0][0],':', info['Dirección'])
-                    print()
-                except Exception as e:
-                    print('!!!!!!!')
-                    print(f"Error al procesar {movie_name}: {e}")
+        for movie_name in movie_list:
+            try:
+                urls = ejecutar_con_timeout(get_movie_multi, movie_name, timeout=7)
+                print(urls)
+                info = ejecutar_con_timeout(obtener_informacion, urls[0][1], timeout=7)
+                print(info)
+                print()
+            except concurrent.futures.TimeoutError:
+                print('!!!!!!!')
+                print(f"Tiempo de espera agotado para {movie_name}")
+            except Exception as e:
+                print('!!!!!!!')
+                print(f"Error al procesar {movie_name}: {e}")
