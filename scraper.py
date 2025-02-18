@@ -25,11 +25,11 @@ def get_movie_multi(nombre):
     s = f.read().decode()
     f.close() #cerramos para consumir menos recursos
     
-    matches = re.findall(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+"', s)
+    matches = re.findall(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+">([^<]+)<\/a>', s)
     #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
 
     if matches:
-        movie_urls = ["https://www.imdb.com/es" + match for match in matches[:5]]
+        movie_urls = [(match[1], "https://www.imdb.com/es" + match[0]) for match in matches[:5]]
         return movie_urls
     else:
         raise Exception("No se encontró la película") #en caso de error.
@@ -89,4 +89,4 @@ if __name__ == "__main__":
     movie_name = input("Introduce el nombre de la película: ")
     urls = get_movie_multi(movie_name)
     print(urls)
-    print(obtener_informacion(urls[0]))
+    print(obtener_informacion(urls[0][1]))
