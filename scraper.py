@@ -18,7 +18,6 @@ HEADERS = {
 def get_movie_multi(nombre):
     #el url donde buscamos, según el nombre de la película que queramos buscar
     search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
-    headers = {"User-Agent": "Mozilla/5.0"}
 
     #realiza la petición al url establecido antes
     req = urllib.request.Request(search_url, headers=headers)
@@ -30,7 +29,7 @@ def get_movie_multi(nombre):
     #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
 
     if matches:
-        movie_urls = ["https://www.imdb.com" + match for match in matches[:5]]
+        movie_urls = ["https://www.imdb.com/es" + match for match in matches[:5]]
         return movie_urls
     else:
         raise Exception("No se encontró la película") #en caso de error.
