@@ -87,32 +87,23 @@ def obtener_informacion(url):
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    import concurrent.futures
-
-    def ejecutar_con_timeout(func, *args, timeout):
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(func, *args)
-            return future.result(timeout=timeout)
-
     movies = [
-    ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
+    ["El señor de los anillos","El Padrino", "Pulp Fiction", "Cielo e infierno"],
     ["Inception", "El caballero oscuro", "Interstellar"],
     ["Forrest Gump", "Cadena perpetua"],
-    ["El senor de los anillos", "Star Wars: Episodio V", "Matrix"],
+    ["Star Wars: Episodio V", "Matrix"],
     ["Gladiator", "Titanic", "Avatar"]]
 
-for movie_list in movies:
     for movie_list in movies:
-        for movie_name in movie_list:
-            try:
-                urls = ejecutar_con_timeout(get_movie_multi, movie_name, timeout=7)
-                print(urls)
-                info = ejecutar_con_timeout(obtener_informacion, urls[0][1], timeout=7)
-                print(info)
-                print()
-            except concurrent.futures.TimeoutError:
-                print('!!!!!!!')
-                print(f"Tiempo de espera agotado para {movie_name}")
-            except Exception as e:
-                print('!!!!!!!')
-                print(f"Error al procesar {movie_name}: {e}")
+        for movie_list in movies:
+            for movie_name in movie_list:
+                try:
+                    urls = get_movie_multi(movie_name)
+                    print(urls[0])
+                    info = obtener_informacion(urls[0][1])
+                    # print(info)
+                    print(urls[0][0],':', info['Dirección'])
+                    print()
+                except Exception as e:
+                    print('!!!!!!!')
+                    print(f"Error al procesar {movie_name}: {e}")
