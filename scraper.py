@@ -34,6 +34,7 @@ def get_movie_multi(nombre):
     else:
         raise Exception("No se encontró la película") #en caso de error.
 
+
 def obtener_informacion(url):
     # Crear una petición con los headers
     req = urllib.request.Request(url, headers=HEADERS)
@@ -48,11 +49,11 @@ def obtener_informacion(url):
     # Sacamos (Año), (Calificación), (Duración)
     EXTRACTOR = rf'.*\<ul class="{CLASS_DURACION}"[^\>]*?\>.*?\<li[^\>]*?\>\<a[^\>]*?\>([\d]+?)\<.+?(?:\<li[^\>]*?\>\<a[^\>]*?\>([^<]+?)\<.+?)?\<li[^\>]*?\>([^\<]+?)\<.+' 
     # Sacamos (puntuación)
-    EXTRACTOR += rf'(?:\<span class="{CLASS_RATING}"\>([\d\.\,]+)\<.+)?'
+    EXTRACTOR += rf'\<span class="{CLASS_RATING}"\>([\d\.\,]+)\<.+'
     # Sacamos (nº de votos)
-    EXTRACTOR += rf'(?:\<div class="{CLASS_NUMEROVOTOS}"\>([^\<]+?)\<.+)?'
+    EXTRACTOR += rf'\<div class="{CLASS_NUMEROVOTOS}"\>([^\<]+?)\<.+'
     # Sacamos (sinopsis)
-    EXTRACTOR += rf'(?:\<span [^\>]*?class="{CLASS_SINOPSIS}"\>([^<]+?)\<)?'
+    EXTRACTOR += rf'\<span [^\>]*?class="{CLASS_SINOPSIS}"\>([^<]+?)\<'
 
     # Extraemos la información
     resultados =  re.search(EXTRACTOR, html, re.DOTALL)
@@ -63,8 +64,8 @@ def obtener_informacion(url):
         'Año': anio,
         'Calificación': calificacion,
         'Duración': duracion,
-        'Puntuación': puntuacion,
-        'Número de Votos': num_votos,
+        'Puntuación': float(puntuacion.replace('\xa0k','')),
+        'Número de Votos': int(num_votos.replace('\xa0k','')),
         'Sinopsis': sinopsis
     }
 
