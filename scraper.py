@@ -20,7 +20,7 @@ def get_movie_multi(nombre):
     search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
 
     #realiza la petición al url establecido antes
-    req = urllib.request.Request(search_url, headers=headers)
+    req = urllib.request.Request(search_url, headers=HEADERS)
     f = urllib.request.urlopen(req)
     s = f.read().decode()
     f.close() #cerramos para consumir menos recursos
