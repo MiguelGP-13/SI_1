@@ -16,7 +16,7 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-def get_movie_multi(nombre):
+def get_movie(nombre):
     #el url donde buscamos, según el nombre de la película que queramos buscar
     search_url = f"https://www.imdb.com/find/?q={urllib.parse.quote(nombre)}"
 
@@ -26,12 +26,11 @@ def get_movie_multi(nombre):
     s = f.read().decode()
     f.close() #cerramos para consumir menos recursos
     
-    matches = re.findall(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+">([^<]+)<\/a>', s)
+    match = re.search(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+">([^<]+)<\/a>', s)
     #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
 
-    if matches:
-        movie_urls = [(match[1], "https://www.imdb.com/es" + match[0]) for match in matches[:5]]
-        return movie_urls
+    if match:
+        return (match[2], "https://www.imdb.com/es" + match[1])
     else:
         raise Exception("No se encontró la película") #en caso de error.
 
@@ -83,37 +82,34 @@ def obtener_informacion(url):
             break
         datos[match.group(1)] =  obtener_nombres.findall(match.group(2))
     
-    
     return datos
+
+def scrapper(nombre:str):
+    peli, url = get_movie(nombre)
+    data = obtener_informacion(url)
+    data['nombre'] = peli
+    return data
+
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    import concurrent.futures
-
-    def ejecutar_con_timeout(func, *args, timeout):
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(func, *args)
-            return future.result(timeout=timeout)
 
     movies = [
-    ["El niño","Star Wars: Episodio V", "Matrix"],
+    ["The Mechanic", "El niño","Star Wars: Episodio V", "Matrix"]]
     ["Gladiator", "Titanic", "Avatar"],
     ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
     ["Inception", "El caballero oscuro", "Interstellar"],
-    ["Forrest Gump", "Cadena perpetua"]]
+    ["Forrest Gump", "Cadena perpetua"]
 
 for movie_list in movies:
     for movie_list in movies:
         for movie_name in movie_list:
             try:
-                urls = ejecutar_con_timeout(get_movie_multi, movie_name, timeout=7)
-                print(urls)
-                info = ejecutar_con_timeout(obtener_informacion, urls[0][1], timeout=7)
+                url = get_movie(movie_name)
+                print(url)
+                info = obtener_informacion(url[1])
                 print(info)
                 print()
-            except concurrent.futures.TimeoutError:
-                print('!!!!!!!')
-                print(f"Tiempo de espera agotado para {movie_name}")
             except Exception as e:
                 print('!!!!!!!')
                 print(f"Error al procesar {movie_name}: {e}")
