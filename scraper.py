@@ -1,4 +1,5 @@
 import urllib.request
+import urllib.parse
 import re
 
 CLASS_DURACION = 'ipc-inline-list ipc-inline-list--show-dividers sc-ec65ba05-2 joVhBE baseAlt'  # Tiene dentro 3 li con año, clasificación y duración
@@ -15,9 +16,9 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-def get_movie_multi(nombre):
+def get_movie(nombre):
     #el url donde buscamos, según el nombre de la película que queramos buscar
-    search_url = f"https://www.imdb.com/find/?q={nombre.replace(' ', '+')}"
+    search_url = f"https://www.imdb.com/find/?q={urllib.parse.quote(nombre)}"
 
     #realiza la petición al url establecido antes
     req = urllib.request.Request(search_url, headers=HEADERS)
@@ -25,12 +26,11 @@ def get_movie_multi(nombre):
     s = f.read().decode()
     f.close() #cerramos para consumir menos recursos
     
-    matches = re.findall(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+">([^<]+)<\/a>', s)
+    match = re.search(r'href="(/title/tt\d+/)\?ref_=fn_all_ttl_\d+">([^<]+)<\/a>', s)
     #guardamos en grupo solo la primera parte por que la segunda supone el orden de aparición en la búsqueda de cada peli
 
-    if matches:
-        movie_urls = [(match[1], "https://www.imdb.com/es" + match[0]) for match in matches[:5]]
-        return movie_urls
+    if match:
+        return (match[2], "https://www.imdb.com/es" + match[1])
     else:
         raise Exception("No se encontró la película") #en caso de error.
 
@@ -82,28 +82,34 @@ def obtener_informacion(url):
             break
         datos[match.group(1)] =  obtener_nombres.findall(match.group(2))
     
-    
     return datos
+
+def scrapper(nombre:str):
+    peli, url = get_movie(nombre)
+    data = obtener_informacion(url)
+    data['nombre'] = peli
+    return data
+
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    movies = [
-    ["El señor de los anillos","El Padrino", "Pulp Fiction", "Cielo e infierno"],
-    ["Inception", "El caballero oscuro", "Interstellar"],
-    ["Forrest Gump", "Cadena perpetua"],
-    ["Star Wars: Episodio V", "Matrix"],
-    ["Gladiator", "Titanic", "Avatar"]]
 
+    movies = [
+    ["The Mechanic", "El niño","Star Wars: Episodio V", "Matrix"]]
+    ["Gladiator", "Titanic", "Avatar"],
+    ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
+    ["Inception", "El caballero oscuro", "Interstellar"],
+    ["Forrest Gump", "Cadena perpetua"]
+
+for movie_list in movies:
     for movie_list in movies:
-        for movie_list in movies:
-            for movie_name in movie_list:
-                try:
-                    urls = get_movie_multi(movie_name)
-                    print(urls[0])
-                    info = obtener_informacion(urls[0][1])
-                    # print(info)
-                    print(urls[0][0],':', info['Dirección'])
-                    print()
-                except Exception as e:
-                    print('!!!!!!!')
-                    print(f"Error al procesar {movie_name}: {e}")
+        for movie_name in movie_list:
+            try:
+                url = get_movie(movie_name)
+                print(url)
+                info = obtener_informacion(url[1])
+                print(info)
+                print()
+            except Exception as e:
+                print('!!!!!!!')
+                print(f"Error al procesar {movie_name}: {e}")
