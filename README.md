@@ -1,4 +1,5 @@
 # Manual de Usuario: Scrapper Peli
+Álvaro Felipe y Miguel Gómez
 
 ## Introducción
 
@@ -126,23 +127,3 @@ Se ha desarrollado una skill para Amazon Alexa llamada **Scrapper Peli** que uti
 
 - Un dispositivo compatible con **Alexa** (Amazon Echo, smartphone con la app de Alexa, etc.).
 - **Conexión a Internet** estable.
-
----
-
-## Consideraciones Finales
-
-- **Actualizaciones**: Si IMDb cambia su diseño o clases CSS, es posible que el scraper requiera actualizaciones para seguir funcionando correctamente.
-
-- **Uso Responsable**: Este scraper es para uso educativo y personal. El scraping de sitios web puede violar los términos de servicio de IMDb. Asegúrese de utilizarlo de manera ética y legal.
-
-- **Soporte**: Si encuentra errores o tiene sugerencias, considere revisar y adaptar el código, especialmente las expresiones regulares y las clases CSS utilizadas.
-
----
-
-## Conclusión
-
-Este scraper y la skill de Alexa **Scrapper Peli** ofrecen herramientas prácticas para obtener información detallada de películas de manera eficiente. Ya sea para uso personal, estudios o proyectos, seguir este manual le permitirá aprovechar al máximo sus funcionalidades.
-
----
-
-**Nota**: Este manual está formateado en Markdown para facilitar su lectura y edición. Puedes copiarlo y pegarlo en tu editor preferido o en un documento de Word si lo deseas.
