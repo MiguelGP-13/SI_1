@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-CONVERTIR = {'director':'Dirección', 'guionistas':'Guionistas', 'elenco':'Elenco', 'nota': 'puntuación'}
+CONVERTIR = {'director':'Dirección', 'guionistas':'Guionistas', 'elenco':'Elenco', 'nota': 'puntuación','valoracion':'puntuación'}
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
