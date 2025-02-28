@@ -93,23 +93,45 @@ def scrapper(nombre:str):
 
 # Ejemplo de uso
 if __name__ == "__main__":
+    import argparse
 
-    movies = [
-    ["The Mechanic", "El niño","Star Wars: Episodio V", "Matrix"]]
-    ["Gladiator", "Titanic", "Avatar"],
-    ["El Padrino", "Pulp Fiction", "Cielo e infierno"],
-    ["Inception", "El caballero oscuro", "Interstellar"],
-    ["Forrest Gump", "Cadena perpetua"]
+    CONVERTIR = {'director':'Dirección', 'guionistas':'Guionistas', 'elenco':'Elenco', 'nota': 'Puntuación', 'valoracion':'Puntuación'}
 
-for movie_list in movies:
-    for movie_list in movies:
-        for movie_name in movie_list:
+    def main():
+        parser = argparse.ArgumentParser(description="Scraping de información de películas en IMDb.")
+        parser.add_argument('nombre', type=str, nargs='?', help='Nombre de la película a buscar')
+        parser.add_argument('-i', '--interactivo', action='store_true', help='Modo interactivo')
+        parser.add_argument('-d', '--dato', type=str, choices=['Año', 'Calificación', 'Duración', 'Puntuación', 'Número de Votos', 'Sinopsis', 'director', 'guionistas', 'elenco', 'nota', 'valoracion', 'Director', 'Guionistas', 'Elenco', 'nombre'], help='Dato específico que deseas obtener')
+
+        args = parser.parse_args()
+
+        def imprimir_datos(datos, dato):
+            if dato:
+                if dato.lower() in CONVERTIR.keys():
+                    dato = CONVERTIR[dato.lower()]
+                print(datos.get(dato, f"El dato {dato} no está disponible."))
+            else:
+                print(datos)
+
+        if args.interactivo:
+            while True:
+                nombre = input("Introduce el nombre de la película (o 'salir' para terminar): ")
+                if nombre.lower() == 'salir':
+                    break
+                try:
+                    datos = scrapper(nombre)
+                    imprimir_datos(datos, args.dato)
+                except Exception as e:
+                    print(f"Error: {e}")
+        else:
+            if not args.nombre:
+                print("Error: Debes proporcionar el nombre de la película si no estás en modo interactivo.")
+                return
+
             try:
-                url = get_movie(movie_name)
-                print(url)
-                info = obtener_informacion(url[1])
-                print(info)
-                print()
+                datos = scrapper(args.nombre)
+                imprimir_datos(datos, args.dato)
             except Exception as e:
-                print('!!!!!!!')
-                print(f"Error al procesar {movie_name}: {e}")
+                print(f"Error: {e}")
+
+    main()
